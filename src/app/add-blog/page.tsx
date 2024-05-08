@@ -159,6 +159,7 @@ const AddBlogPage = () => {
               },
               "& .MuiInputLabel-root.Mui-focused": {
                 fontSize: "20px", // Change the font size when focused
+                color: "black",
               },
               "& .MuiOutlinedInput-root": {
                 "& fieldset": {
@@ -191,6 +192,7 @@ const AddBlogPage = () => {
               },
               "& .MuiInputLabel-root.Mui-focused": {
                 fontSize: "20px", // Change the font size when focused
+                color: "black",
               },
               "& .MuiOutlinedInput-root": {
                 "& fieldset": {
