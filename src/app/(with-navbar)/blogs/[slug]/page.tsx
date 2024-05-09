@@ -179,10 +179,14 @@ const SingleBlogPage = () => {
       } else {
         console.log("This is comment and blogid", comment, blogId);
 
-        const response = await AddComment({
-          blogId,
-          message: comment,
-        });
+        const response = await AddComment(
+          {
+            blogId,
+          },
+          {
+            message: comment,
+          }
+        );
 
         console.log("This is Response: ", response.Data);
       }
