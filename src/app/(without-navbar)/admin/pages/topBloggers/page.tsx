@@ -18,15 +18,31 @@ import { GetTopBloggers } from "@/app/common/helper/admin-helper/admin.top-blogg
 import { CustomError } from "@/app/common/errors/custom.error";
 
 const topBloggersPage = () => {
-  const [monthfilter, setMonthFilter] = React.useState("");
-  const [yearfilter, setYearFilter] = React.useState("2024");
+  const [monthfilter, setMonthFilter] = useState<string>("1");
+  const [yearfilter, setYearFilter] = useState<string>("2024");
+  const monthNameToNumber: Record<string, string> = {
+    january: "1",
+    february: "2",
+    march: "3",
+    april: "4",
+    may: "5",
+    june: "6",
+    july: "7",
+    august: "8",
+    september: "9",
+    october: "10",
+    november: "11",
+    december: "12",
+  };
 
   const [cardsData, setCardsData] = useState<any[]>([]);
 
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleMonthChange = (event: SelectChangeEvent) => {
-    setMonthFilter(event.target.value as string);
+    const monthName = event.target.value.toLowerCase();
+
+    setMonthFilter(monthName === "all" ? "" : monthNameToNumber[monthName]);
   };
 
   const handleYearChange = (event: SelectChangeEvent) => {
