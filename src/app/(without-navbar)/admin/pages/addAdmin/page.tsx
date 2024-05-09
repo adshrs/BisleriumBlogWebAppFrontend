@@ -1,33 +1,69 @@
 "use client";
 import React, { useState } from "react";
-import { Box, Button, Paper, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { BASE_URL } from "@/app/common/constant/constant";
+import { AddAdmin } from "@/app/common/helper/admin-helper/admin.add-admin.request";
+import {
+  ReturnProps,
+  validateForm,
+} from "@/app/common/helper/login-helper/login.validation";
+import { Login, Visibility, VisibilityOff } from "@mui/icons-material";
+import router from "next/router";
+import { CustomError } from "@/app/common/errors/custom.error";
 
 const AddUsersPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const [errorMessage, setErrorMessage] = useState("");
+  const [userNameEmptyError, setUserNameEmptyError] = useState("");
+  const [passwordEmptyError, setPasswordEmptyError] = useState("");
+
+  const [isUserNameEmpty, setIsUserNameEmpty] = useState(false);
+  const [isPasswordEmpty, setIsPasswordEmpty] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
   const handleAddUser = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/admin/admin/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      const validatedForm: ReturnProps = validateForm(username, null, password);
+      if (validatedForm.isEmpty) {
+        if (validatedForm.forUserName && validatedForm.forEmail) {
+          setIsUserNameEmpty(true);
+          setUserNameEmptyError(validatedForm.forUserName);
+        }
+        if (validatedForm.forPassword) {
+          setIsPasswordEmpty(true);
+          setPasswordEmptyError(validatedForm.forPassword);
+        }
+      } else {
+        var response;
+        response = await AddAdmin({
           userName: username,
-          password: password,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to add user");
+          password,
+        });
+        console.log("This is Response: ", response.Data);
       }
-      console.log("User added successfully");
-      setUsername("");
-      setPassword("");
     } catch (error) {
-      console.error("Error adding user:", error);
+      if (error instanceof CustomError) {
+        console.log("This is Error in fetch: ", error._error);
+        if (error._error.Message instanceof Array) {
+          //This is not required since every thing is handle by frontend
+        }
+        setErrorMessage(error._error.Message);
+        console.log("This is Error: ", error._error.Message);
+      }
     }
   };
 
@@ -69,8 +105,14 @@ const AddUsersPage = () => {
           fullWidth
           variant="standard"
           label="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          error={isUserNameEmpty}
+          helperText={isUserNameEmpty ? userNameEmptyError : ""}
+          onChange={(e) => {
+            setUsername(e.target.value);
+            if (e.target.value.trim() !== "") {
+              setUserNameEmptyError("");
+            }
+          }}
         />
         <TextField
           margin="normal"
@@ -78,9 +120,28 @@ const AddUsersPage = () => {
           fullWidth
           variant="standard"
           label="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          error={isPasswordEmpty}
+          helperText={isPasswordEmpty ? passwordEmptyError : ""}
+          type={showPassword ? "text" : "password"}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (e.target.value.trim() !== "") {
+              setPasswordEmptyError("");
+            }
+          }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         <Button
           type="button"

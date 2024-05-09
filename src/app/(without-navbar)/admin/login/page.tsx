@@ -67,7 +67,7 @@ const LoginPage = () => {
         Cookies.set("Token", response.Data);
 
         // Redirect to Home page
-        router.push("/admin/dashboard");
+        router.push("/admin/pages/dashboard");
       }
     } catch (error) {
       if (error instanceof CustomError) {
