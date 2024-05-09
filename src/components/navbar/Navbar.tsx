@@ -13,6 +13,7 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import AddIcon from "@mui/icons-material/Add";
 import { green } from "@mui/material/colors";
 
 const pages = [
@@ -67,6 +68,7 @@ function Navbar() {
     <AppBar
       position="static"
       sx={{ bgcolor: "black", padding: "0 25px 0 25px" }}
+      elevation={0}
     >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
@@ -187,12 +189,14 @@ function Navbar() {
                       bgcolor: "white",
                       borderColor: "white",
                       mr: 3,
+                      pr: 3,
                       "&:hover": { backgroundColor: "lightgrey" },
                     }}
                   >
+                    <AddIcon sx={{ mr: 1, height: "20px", width: "20px" }} />
                     Create
                   </Button>
-                  <IconButton aria-label="account" edge="end" sx={{ mr: 3 }}>
+                  <IconButton aria-label="account" edge="end" sx={{ mr: 2 }}>
                     <NotificationsIcon
                       color="primary"
                       sx={{ fontSize: 30, color: "white" }}
@@ -203,7 +207,6 @@ function Navbar() {
                       <Avatar
                         sx={{
                           bgcolor: green[500],
-                          margin: 2,
                         }}
                         alt="Aditya Shrestha"
                         src="/static/images/avatar/2.jpg"
