@@ -8,12 +8,12 @@ export interface CreateBlogProps {
   imgUrl: string | null;
 }
 
-export interface getBlogProps {
+export interface GetBlogProps {
   page: string;
   shortBy: number | null;
 }
 
-export interface getBlogInfoProps {
+export interface GetBlogInfoProps {
   blogId: string;
 }
 
@@ -36,7 +36,7 @@ export async function CreateBlog(dataToSend: CreateBlogProps) {
   return await response.json();
 }
 
-export async function getBlogs(dataToSend: getBlogProps) {
+export async function GetBlogs(dataToSend: GetBlogProps) {
   const response: Response = await fetch(`${BASE_URL}api/user/blogs/list?page=${dataToSend.page}`, {
     method: "GET",
     headers: {
@@ -52,7 +52,7 @@ export async function getBlogs(dataToSend: getBlogProps) {
   return await response.json();
 }
 
-export async function getBlogInfo(dataToSend: getBlogInfoProps) {
+export async function GetBlogInfo(dataToSend: GetBlogInfoProps) {
   const response: Response = await fetch(`${BASE_URL}api/user/blogs/info/${dataToSend.blogId}`, {
     method: "GET",
     headers: {

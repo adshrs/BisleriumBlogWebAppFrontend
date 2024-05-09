@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getBlogs } from "@/app/common/helper/blog-helper/blog.request";
+import { GetBlogs } from "@/app/common/helper/blog-helper/blog.request";
 import { CustomError } from "@/app/common/errors/custom.error";
 
 type CardData = {
@@ -34,7 +34,7 @@ const BlogsPage = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await getBlogs({
+        const response = await GetBlogs({
           page: `${pageNumber}`,
           shortBy: null,
         });

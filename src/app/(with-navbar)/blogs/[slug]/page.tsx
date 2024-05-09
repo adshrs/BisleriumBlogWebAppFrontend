@@ -20,10 +20,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CustomError } from "@/app/common/errors/custom.error";
 import {
-  getBlogInfo,
-  getBlogs,
+  CreateBlog,
+  GetBlogInfo,
+  GetBlogs,
 } from "@/app/common/helper/blog-helper/blog.request";
 import { useEffect, useState } from "react";
+import {
+  DownVoteBlog,
+  GetVoteInfo,
+  UpVoteBlog,
+} from "@/app/common/helper/vote-helper/vote.request";
+import { AddComment } from "@/app/common/helper/comment-helper/comment.request";
+import {
+  ReturnProps,
+  validateForm,
+} from "@/app/common/helper/comment-helper/comment.validation";
+import router from "next/router";
 
 const SingleBlogPage = () => {
   const currentPath = usePathname(); // getting the current path URL
@@ -31,22 +43,63 @@ const SingleBlogPage = () => {
   const blogId = parts!![2]; // Extract the part after the second slash
 
   const [imgUrl, setImgUrl] = useState("");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [author, setAuthor] = useState("");
+  const [date, setDate] = useState("");
+  const [upvotes, setUpVotes] = useState(0);
+  const [downvotes, setDownVotes] = useState(0);
+  const [isUpVote, setIsUpVote] = useState<boolean | null>(null);
+  const [comment, setComment] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [commentEmptyError, setCommentEmptyError] = useState("");
 
-  let imgString = "";
+  const [isCommentEmpty, setIsCommentEmpty] = useState(false);
 
   useEffect(() => {
     async function fetchBlogInfo() {
       try {
         console.log("requesting");
-        const response = await getBlogInfo({
+        const response = await GetBlogInfo({
           blogId,
         });
-        setImgUrl(response.Data.imgUrl);
-        imgString = response.Data.imgUrl;
-        setImgUrl(imgString);
-        console.log("This is Response: ", response.Data);
+        setImgUrl("/" + response.Data.imgUrl);
+        setAuthor(response.Data.postUser.name);
+        setTitle(response.Data.title);
+        setContent(response.Data.content);
+
+        //Formatting date
+        const dateString = response.Data.createdAt;
+        const dateObject = new Date(dateString);
+        const formattedDate = dateObject.toISOString().split("T")[0];
+        setDate(formattedDate);
+
+        setUpVotes(response.Data.upVote);
+        setDownVotes(response.Data.downVote);
+
+        console.log("This is Blog Info Response: ", response.Data);
+      } catch (error) {
+        if (error instanceof CustomError) {
+          console.log("This is Error in fetch: ", error._error);
+          if (error._error.Message instanceof Array) {
+            //This is not required since every thing is handle by frontend
+          }
+          setErrorMessage(error._error.Message);
+          console.log("This is Error: ", error._error.Message);
+        }
+      }
+    }
+
+    async function fetchVoteInfo() {
+      try {
+        console.log("requesting");
+        const response = await GetVoteInfo({
+          blogId,
+        });
+
+        setIsUpVote(response.Data.isUpVote);
+        console.log("This is Vote Info Response: ", response.Data);
       } catch (error) {
         if (error instanceof CustomError) {
           console.log("This is Error in fetch: ", error._error);
@@ -60,12 +113,90 @@ const SingleBlogPage = () => {
     }
 
     fetchBlogInfo();
-  }, []);
+    fetchVoteInfo();
+  }, [blogId]);
 
-  useEffect(() => {
-    setImgUrl(imgString);
-    console.log(imgUrl); // This will log the updated imgUrl after it changes.
-  }, [imgUrl]);
+  async function handleUpVote() {
+    try {
+      console.log("requesting");
+      const response = await UpVoteBlog({
+        blogId,
+      });
+
+      setUpVotes((prevUpvotes) => prevUpvotes + 1);
+      setDownVotes((prevDownvotes) => prevDownvotes - 1); // Decrease the downvotes
+      setIsUpVote(true);
+
+      console.log("This is Upvote Response: ", response.Data);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        console.log("This is Error in fetch: ", error._error);
+        if (error._error.Message instanceof Array) {
+          //This is not required since every thing is handle by frontend
+        }
+        setErrorMessage(error._error.Message);
+        console.log("This is Error: ", error._error.Message);
+      }
+    }
+  }
+
+  async function handleDownVote() {
+    try {
+      console.log("requesting");
+      const response = await DownVoteBlog({
+        blogId,
+      });
+
+      setDownVotes((prevDownvotes) => prevDownvotes + 1);
+      setUpVotes((prevUpvotes) => prevUpvotes - 1);
+      setIsUpVote(false);
+
+      console.log("This is Downvote Response: ", response.Data);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        console.log("This is Error in fetch: ", error._error);
+        if (error._error.Message instanceof Array) {
+          //This is not required since every thing is handle by frontend
+        }
+        setErrorMessage(error._error.Message);
+        console.log("This is Error: ", error._error.Message);
+      }
+    }
+  }
+
+  async function HandleCreateComment() {
+    // Resetting error states
+    setErrorMessage("");
+    setIsCommentEmpty(false);
+
+    try {
+      const validatedForm: ReturnProps = validateForm(comment);
+      if (validatedForm.isEmpty) {
+        if (validatedForm.forMessage) {
+          setIsCommentEmpty(true);
+          setCommentEmptyError(validatedForm.forMessage);
+        }
+      } else {
+        console.log("This is comment and blogid", comment, blogId);
+
+        const response = await AddComment({
+          blogId,
+          message: comment,
+        });
+
+        console.log("This is Response: ", response.Data);
+      }
+    } catch (error) {
+      if (error instanceof CustomError) {
+        console.log("This is Error in fetch: ", error._error);
+        if (error._error.Message instanceof Array) {
+          //This is not required since every thing is handle by frontend
+        }
+        setErrorMessage(error._error.Message);
+        console.log("This is Error: ", error._error.Message);
+      }
+    }
+  }
 
   return (
     <Box
@@ -95,44 +226,41 @@ const SingleBlogPage = () => {
         <CardMedia
           component="img"
           image={imgUrl}
-          alt="green iguana"
+          alt=""
           sx={{
             height: "100%",
           }}
         />
       </Card>
       <Box display={"flex"} alignItems={"center"} gap={2}>
-        <Box marginTop={"26px"}>
-          <AvatarGroup max={3}>
-            <Avatar />
-            <Avatar />
-            <Avatar />
-            <Avatar />
-          </AvatarGroup>
-        </Box>
         <Box sx={{ display: "flex", alignItems: "center", marginTop: "30px" }}>
           <Typography
             variant="body1"
             sx={{ marginRight: "15px", color: "#1dd3b0", fontWeight: "500" }}
           >
-            45
+            {upvotes}
           </Typography>
-          <Button
-            size="small"
-            disableElevation
-            startIcon={<ThumbUpIcon />}
-            variant="contained"
-            sx={{ bgcolor: "#1dd3b0" }}
-          >
-            Upvote
-          </Button>
+
+          {
+            <Button
+              size="small"
+              disableElevation
+              startIcon={<ThumbUpIcon />}
+              variant="contained"
+              sx={{ bgcolor: "#1dd3b0" }}
+              disabled={isUpVote === true}
+              onClick={handleUpVote}
+            >
+              Upvote
+            </Button>
+          }
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", marginTop: "30px" }}>
           <Typography
             variant="body1"
             sx={{ marginRight: "15px", color: "#ef233c", fontWeight: "500" }}
           >
-            55
+            {downvotes}
           </Typography>
           <Button
             size="small"
@@ -140,6 +268,8 @@ const SingleBlogPage = () => {
             startIcon={<ThumbDownAltIcon />}
             variant="contained"
             sx={{ bgcolor: "#ef233c" }}
+            disabled={isUpVote === false}
+            onClick={handleDownVote}
           >
             Downvote
           </Button>
@@ -163,10 +293,10 @@ const SingleBlogPage = () => {
           }}
         >
           <Avatar></Avatar>
-          <Typography sx={{ fontSize: "20px" }}>Rishav Kumar Gurung</Typography>
+          <Typography sx={{ fontSize: "20px" }}>{author}</Typography>
         </Box>
-        <Box>
-          <Typography sx={{ fontSize: "14px" }}>12/12/2024</Typography>
+        <Box pl={2}>
+          <Typography sx={{ fontSize: "16px" }}>{date}</Typography>
         </Box>
       </Box>
       <Box marginTop={"30px"}>
@@ -174,8 +304,7 @@ const SingleBlogPage = () => {
           variant="h4"
           sx={{ maxWidth: "100%", textWrap: "wrap", textAlign: "justify" }}
         >
-          Top places to visit in Rome 2025 that are budget-friendly. Discover
-          the trip cost and details.
+          {title}
         </Typography>
       </Box>
 
@@ -188,32 +317,7 @@ const SingleBlogPage = () => {
             textAlign: "justify",
           }}
         >
-          It is a long established fact that a reader will be distracted by the
-          readable content of a page when looking at its layout. The point of
-          using Lorem Ipsum is that it has a more-or-less normal distribution of
-          letters, as opposed to using 'Content here, content here', making it
-          look like readable English. Many desktop publishing packages and web
-          page editors now use Lorem Ipsum as their default model text, and a
-          search for 'lorem ipsum' will uncover many web sites still in their
-          infancy. Various versions have evolved over the years, sometimes by
-          accident, sometimes on purpose. It is a long established fact that a
-          reader will be distracted by the readable content of a page when
-          looking at its layout. The point of using Lorem Ipsum is that it has a
-          more-or-less normal distribution of letters, as opposed to using
-          'Content here, content here', making it look like readable English.
-          Many desktop publishing packages and web page editors now use Lorem
-          Ipsum as their default model text, and a search for 'lorem ipsum' will
-          uncover many web sites still in their infancy. Various versions have
-          evolved over the years, sometimes by accident, sometimes on purpose.
-          It is a long established fact that a reader will be distracted by the
-          readable content of a page when looking at its layout. The point of
-          using Lorem Ipsum is that it has a more-or-less normal distribution of
-          letters, as opposed to using 'Content here, content here', making it
-          look like readable English. Many desktop publishing packages and web
-          page editors now use Lorem Ipsum as their default model text, and a
-          search for 'lorem ipsum' will uncover many web sites still in their
-          infancy. Various versions have evolved over the years, sometimes by
-          accident, sometimes on purpose.
+          {content}
         </Typography>
       </Box>
       <Divider sx={{ width: "100%", marginTop: 5 }} />
@@ -377,17 +481,49 @@ const SingleBlogPage = () => {
       </Box>
       <Box sx={{ width: "720px", marginLeft: "89px", marginTop: "20px" }}>
         <TextField
-          fullWidth
+          onChange={(e) => {
+            setComment(e.target.value);
+            if (e.target.value.trim() !== "") {
+              setCommentEmptyError("");
+            }
+          }}
+          required
+          id="outlined-required"
           placeholder="Add a comment"
+          sx={{
+            width: "100%",
+            maxWidth: "100%",
+            "& .MuiInputLabel-root": {
+              color: "grey",
+            },
+            "& .MuiInputLabel-root.Mui-focused": {
+              fontSize: "20px",
+              color: "black",
+            },
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "black",
+              },
+              "&:hover fieldset": {
+                borderColor: "#black",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "Black",
+                fontSize: "20px",
+              },
+            },
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton>
+                <IconButton onClick={HandleCreateComment}>
                   <SendIcon />
                 </IconButton>
               </InputAdornment>
             ),
           }}
+          error={isCommentEmpty}
+          helperText={isCommentEmpty ? commentEmptyError : ""}
         />
       </Box>
     </Box>
