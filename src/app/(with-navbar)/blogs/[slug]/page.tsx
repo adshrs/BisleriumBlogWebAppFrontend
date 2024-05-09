@@ -145,9 +145,10 @@ const SingleBlogPage = () => {
       });
 
       setUpVotes((prevUpvotes) => prevUpvotes + 1);
-      if (downVotes !== 0) {
-        setDownVotes((prevDownvotes) => prevDownvotes - 1); // Decrease the downvotes
+      if (downvotes > 0) {
+        setDownVotes((prevDownvotes) => prevDownvotes - 1);
       }
+
       setIsUpVote(true);
 
       console.log("This is Upvote Response: ", response.Data);
@@ -171,9 +172,10 @@ const SingleBlogPage = () => {
       });
 
       setDownVotes((prevDownvotes) => prevDownvotes + 1);
-      if (upVotes !== 0) {
+      if (upVotes > 0) {
         setUpVotes((prevUpvotes) => prevUpvotes - 1);
       }
+
       setIsUpVote(false);
 
       console.log("This is Downvote Response: ", response.Data);
