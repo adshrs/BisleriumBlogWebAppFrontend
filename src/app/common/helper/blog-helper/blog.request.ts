@@ -13,11 +13,13 @@ export interface getBlogProps {
   shortBy: number | null;
 }
 
+export interface getBlogInfoProps {
+  blogId: string;
+}
+
 const token = Cookies.get("Token");
 
 export async function CreateBlog(dataToSend: CreateBlogProps) {
-  
-
   const response: Response = await fetch(`${BASE_URL}api/user/blogs/create`, {
     method: "POST",
     headers: {
@@ -49,3 +51,20 @@ export async function getBlogs(dataToSend: getBlogProps) {
   }
   return await response.json();
 }
+
+export async function getBlogInfo(dataToSend: getBlogInfoProps) {
+  const response: Response = await fetch(`${BASE_URL}api/user/blogs/info/${dataToSend.blogId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    console.log("This is Error in BlogCommon: ", error);
+    throw new CustomError(error);
+  }
+  return await response.json();
+}
+

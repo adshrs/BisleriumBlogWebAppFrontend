@@ -17,10 +17,56 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownAltIcon from "@mui/icons-material/ThumbDownAlt";
 import SendIcon from "@mui/icons-material/Send";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { CustomError } from "@/app/common/errors/custom.error";
+import {
+  getBlogInfo,
+  getBlogs,
+} from "@/app/common/helper/blog-helper/blog.request";
+import { useEffect, useState } from "react";
 
 const SingleBlogPage = () => {
+  const currentPath = usePathname(); // getting the current path URL
+  const parts = currentPath?.split("/"); // Split the path by slashes
+  const blogId = parts!![2]; // Extract the part after the second slash
+
+  const [imgUrl, setImgUrl] = useState("");
+
+  const [errorMessage, setErrorMessage] = useState("");
+
+  let imgString = "";
+
+  useEffect(() => {
+    async function fetchBlogInfo() {
+      try {
+        console.log("requesting");
+        const response = await getBlogInfo({
+          blogId,
+        });
+        setImgUrl(response.Data.imgUrl);
+        imgString = response.Data.imgUrl;
+        setImgUrl(imgString);
+        console.log("This is Response: ", response.Data);
+      } catch (error) {
+        if (error instanceof CustomError) {
+          console.log("This is Error in fetch: ", error._error);
+          if (error._error.Message instanceof Array) {
+            //This is not required since every thing is handle by frontend
+          }
+          setErrorMessage(error._error.Message);
+          console.log("This is Error: ", error._error.Message);
+        }
+      }
+    }
+
+    fetchBlogInfo();
+  }, []);
+
+  useEffect(() => {
+    setImgUrl(imgString);
+    console.log(imgUrl); // This will log the updated imgUrl after it changes.
+  }, [imgUrl]);
+
   return (
     <Box
       sx={{
@@ -48,7 +94,7 @@ const SingleBlogPage = () => {
       >
         <CardMedia
           component="img"
-          // image={1.jpg}
+          image={imgUrl}
           alt="green iguana"
           sx={{
             height: "100%",

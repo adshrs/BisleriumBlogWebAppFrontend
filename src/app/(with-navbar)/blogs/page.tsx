@@ -34,18 +34,14 @@ const BlogsPage = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log("requesting");
         const response = await getBlogs({
           page: `${pageNumber}`,
           shortBy: null,
         });
-        console.log("This is Response: ", response.Data);
 
         setCardsData(response.Data.data);
         setPageNumber(response.Data["pageNumber"]);
         setTotalCount(response.Data.totalCount);
-
-        console.log("This is Cards Data: ", cardsData);
       } catch (error) {
         if (error instanceof CustomError) {
           console.log("This is Error in fetch: ", error._error);
