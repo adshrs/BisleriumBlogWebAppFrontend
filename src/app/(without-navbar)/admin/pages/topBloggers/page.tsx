@@ -13,11 +13,17 @@ import {
   Typography,
 } from "@mui/material";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { GetTopBloggers } from "@/app/common/helper/admin-helper/admin.top-bloggers.request";
+import { CustomError } from "@/app/common/errors/custom.error";
 
 const topBloggersPage = () => {
-  const [Monthfilter, setMonthFilter] = React.useState("all");
-  const [Yearfilter, setYearFilter] = React.useState("2024");
+  const [monthfilter, setMonthFilter] = React.useState("");
+  const [yearfilter, setYearFilter] = React.useState("2024");
+
+  const [cardsData, setCardsData] = useState<any[]>([]);
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleMonthChange = (event: SelectChangeEvent) => {
     setMonthFilter(event.target.value as string);
@@ -26,6 +32,31 @@ const topBloggersPage = () => {
   const handleYearChange = (event: SelectChangeEvent) => {
     setYearFilter(event.target.value as string);
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await GetTopBloggers({
+          year: yearfilter,
+          month: monthfilter,
+        });
+        console.log(response);
+
+        setCardsData(response.Data);
+      } catch (error) {
+        if (error instanceof CustomError) {
+          console.log("This is Error in fetch: ", error._error);
+          if (error._error.Message instanceof Array) {
+            //This is not required since every thing is handle by frontend
+          }
+          setErrorMessage(error._error.Message);
+          console.log("This is Error: ", error._error.Message);
+        }
+      }
+    }
+
+    fetchData();
+  }, [monthfilter, yearfilter]);
 
   return (
     <Box sx={{ display: "flex", marginLeft: "250px" }}>
@@ -50,7 +81,7 @@ const topBloggersPage = () => {
               <FormControl>
                 <InputLabel>Month Filter</InputLabel>
                 <Select
-                  value={Monthfilter}
+                  value={monthfilter}
                   label="Month Filter"
                   onChange={handleMonthChange}
                 >
@@ -72,7 +103,7 @@ const topBloggersPage = () => {
               <FormControl>
                 <InputLabel>Year Filter</InputLabel>
                 <Select
-                  value={Yearfilter}
+                  value={yearfilter}
                   label="YearFilter"
                   onChange={handleYearChange}
                 >
@@ -93,210 +124,47 @@ const topBloggersPage = () => {
             flexWrap: "wrap",
           }}
         >
-          <Card
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "230px",
-              height: "230px",
-              bgcolor: "#323232",
-            }}
-            elevation={0}
-          >
-            <CardContent
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                badgeContent={<MilitaryTechIcon sx={{ color: "gold" }} />}
+          {cardsData !== null &&
+            cardsData.map((card, index) => (
+              <Card
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "230px",
+                  height: "230px",
+                  bgcolor: "#323232",
+                }}
+                elevation={0}
               >
-                <Avatar sx={{ bgcolor: "black" }}>AS</Avatar>
-              </Badge>
-              <Typography
-                sx={{ color: "white", fontSize: "18px", textAlign: "center" }}
-              >
-                Aditya Chandra Shrestha
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "230px",
-              height: "230px",
-              bgcolor: "#323232",
-            }}
-            elevation={0}
-          >
-            <CardContent
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                badgeContent={<MilitaryTechIcon sx={{ color: "gold" }} />}
-              >
-                <Avatar sx={{ bgcolor: "black" }}>AS</Avatar>
-              </Badge>
-              <Typography
-                sx={{ color: "white", fontSize: "18px", textAlign: "center" }}
-              >
-                Aditya Chandra Shrestha
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "230px",
-              height: "230px",
-              bgcolor: "#323232",
-            }}
-            elevation={0}
-          >
-            <CardContent
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                badgeContent={<MilitaryTechIcon sx={{ color: "gold" }} />}
-              >
-                <Avatar sx={{ bgcolor: "black" }}>AS</Avatar>
-              </Badge>
-              <Typography
-                sx={{ color: "white", fontSize: "18px", textAlign: "center" }}
-              >
-                Aditya Chandra Shrestha
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "230px",
-              height: "230px",
-              bgcolor: "#323232",
-            }}
-            elevation={0}
-          >
-            <CardContent
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                badgeContent={<MilitaryTechIcon sx={{ color: "gold" }} />}
-              >
-                <Avatar sx={{ bgcolor: "black" }}>AS</Avatar>
-              </Badge>
-              <Typography
-                sx={{ color: "white", fontSize: "18px", textAlign: "center" }}
-              >
-                Aditya Chandra Shrestha
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "230px",
-              height: "230px",
-              bgcolor: "#323232",
-            }}
-            elevation={0}
-          >
-            <CardContent
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                badgeContent={<MilitaryTechIcon sx={{ color: "gold" }} />}
-              >
-                <Avatar sx={{ bgcolor: "black" }}>AS</Avatar>
-              </Badge>
-              <Typography
-                sx={{ color: "white", fontSize: "18px", textAlign: "center" }}
-              >
-                Aditya Chandra Shrestha
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "230px",
-              height: "230px",
-              bgcolor: "#323232",
-            }}
-            elevation={0}
-          >
-            <CardContent
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                badgeContent={<MilitaryTechIcon sx={{ color: "gold" }} />}
-              >
-                <Avatar sx={{ bgcolor: "black" }}>AS</Avatar>
-              </Badge>
-              <Typography
-                sx={{ color: "white", fontSize: "18px", textAlign: "center" }}
-              >
-                Aditya Chandra Shrestha
-              </Typography>
-            </CardContent>
-          </Card>
+                <CardContent
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  <Badge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    badgeContent={<MilitaryTechIcon sx={{ color: "gold" }} />}
+                  >
+                    <Avatar sx={{ bgcolor: "black" }}></Avatar>
+                  </Badge>
+                  <Typography
+                    sx={{
+                      color: "white",
+                      fontSize: "18px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {card.name}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
         </Box>
       </Box>
     </Box>

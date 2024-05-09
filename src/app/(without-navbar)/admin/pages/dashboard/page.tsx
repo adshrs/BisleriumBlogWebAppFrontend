@@ -115,23 +115,6 @@ const AdminDashboardPage = () => {
               alignItems: "center",
               width: "225px",
               height: "200px",
-              bgcolor: "#2a9d8f",
-            }}
-            elevation={0}
-          >
-            <CardContent>
-              <Typography sx={{ color: "white", fontSize: "18px" }}>
-                Total Users: 120
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "225px",
-              height: "200px",
               bgcolor: "#f4a261",
             }}
             elevation={0}
