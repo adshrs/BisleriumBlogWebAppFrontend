@@ -27,6 +27,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   DownVoteBlog,
+  GetCommentVoteInfo,
   GetVoteInfo,
   UpVoteBlog,
 } from "@/app/common/helper/vote-helper/vote.request";
@@ -36,6 +37,14 @@ import {
   validateForm,
 } from "@/app/common/helper/comment-helper/comment.validation";
 import router from "next/router";
+
+interface Comment {
+  id: number;
+  commentedUserName: string;
+  message: string;
+  upVote: number;
+  downVote: number;
+}
 
 const SingleBlogPage = () => {
   const currentPath = usePathname(); // getting the current path URL
@@ -47,10 +56,16 @@ const SingleBlogPage = () => {
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
   const [date, setDate] = useState("");
-  const [upvotes, setUpVotes] = useState(0);
+  const [upVotes, setUpVotes] = useState(0);
   const [downvotes, setDownVotes] = useState(0);
   const [isUpVote, setIsUpVote] = useState<boolean | null>(null);
+
+  const [commentList, setCommentList] = useState<Comment[]>([]);
+
   const [comment, setComment] = useState("");
+  const [commentUpvotes, setCommentUpVotes] = useState(0);
+  const [downVotes, setCommentDownVotes] = useState(0);
+  const [isCommentUpVote, setIsCommentUpVote] = useState<boolean | null>(null);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [commentEmptyError, setCommentEmptyError] = useState("");
@@ -77,6 +92,8 @@ const SingleBlogPage = () => {
 
         setUpVotes(response.Data.upVote);
         setDownVotes(response.Data.downVote);
+
+        setCommentList(response.Data.comments);
 
         console.log("This is Blog Info Response: ", response.Data);
       } catch (error) {
@@ -116,6 +133,10 @@ const SingleBlogPage = () => {
     fetchVoteInfo();
   }, [blogId]);
 
+  useEffect(() => {
+    console.log("These are the set comments: ", commentList);
+  }, [commentList]);
+
   async function handleUpVote() {
     try {
       console.log("requesting");
@@ -124,7 +145,9 @@ const SingleBlogPage = () => {
       });
 
       setUpVotes((prevUpvotes) => prevUpvotes + 1);
-      setDownVotes((prevDownvotes) => prevDownvotes - 1); // Decrease the downvotes
+      if (downVotes !== 0) {
+        setDownVotes((prevDownvotes) => prevDownvotes - 1); // Decrease the downvotes
+      }
       setIsUpVote(true);
 
       console.log("This is Upvote Response: ", response.Data);
@@ -148,7 +171,9 @@ const SingleBlogPage = () => {
       });
 
       setDownVotes((prevDownvotes) => prevDownvotes + 1);
-      setUpVotes((prevUpvotes) => prevUpvotes - 1);
+      if (upVotes !== 0) {
+        setUpVotes((prevUpvotes) => prevUpvotes - 1);
+      }
       setIsUpVote(false);
 
       console.log("This is Downvote Response: ", response.Data);
@@ -187,7 +212,7 @@ const SingleBlogPage = () => {
             message: comment,
           }
         );
-
+        setCommentList((prevComments) => [...prevComments, response.Data]);
         console.log("This is Response: ", response.Data);
       }
     } catch (error) {
@@ -242,7 +267,7 @@ const SingleBlogPage = () => {
             variant="body1"
             sx={{ marginRight: "15px", color: "#1dd3b0", fontWeight: "500" }}
           >
-            {upvotes}
+            {upVotes}
           </Typography>
 
           {
@@ -340,147 +365,55 @@ const SingleBlogPage = () => {
             padding: 0,
           }}
         >
-          <Card
-            elevation={0}
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              width: "80%",
-              margin: "auto",
-              marginTop: 2,
-              bgcolor: "white",
-              paddingX: "40px",
-              paddingY: "40px",
-              position: "relative",
-            }}
-          >
-            <Avatar></Avatar>
-            <Box sx={{ width: "85%", margin: "auto" }}>
-              <Typography variant="body1" sx={{ fontWeight: "600" }}>
-                Aditya Shrestha
-              </Typography>
-              <Typography sx={{ textAlign: "justify" }}>
-                Hello, its my first comment, how are you??? I am fine, i like
-                this blog, thankyou!!!!!!
-              </Typography>
-            </Box>
-            <Box sx={{ position: "absolute", top: 5, right: 5 }}>
-              <Box
+          {commentList !== null &&
+            commentList.map((comment, index) => (
+              <Card
+                elevation={0}
                 sx={{
                   display: "flex",
                   flexDirection: "row",
-                  alignItems: "center",
+                  width: "80%",
+                  margin: "auto",
+                  marginTop: 2,
+                  bgcolor: "white",
+                  paddingX: "40px",
+                  paddingY: "40px",
+                  position: "relative",
                 }}
               >
-                <Typography variant="body2" sx={{ color: "#1dd3b0" }}>
-                  2
-                </Typography>
-                <IconButton>
-                  <ThumbUpIcon sx={{ color: "#1dd3b0" }} />
-                </IconButton>
-                <Typography variant="body2" sx={{ color: "#ef233c" }}>
-                  2
-                </Typography>
-                <IconButton>
-                  <ThumbDownAltIcon sx={{ color: "#ef233c" }} />
-                </IconButton>
-              </Box>
-            </Box>
-          </Card>
-          <Card
-            elevation={0}
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              width: "80%",
-              margin: "auto",
-              marginTop: 2,
-              bgcolor: "white",
-              paddingX: "40px",
-              paddingY: "40px",
-              position: "relative",
-            }}
-          >
-            <Avatar></Avatar>
-            <Box sx={{ width: "85%", margin: "auto" }}>
-              <Typography variant="body1" sx={{ fontWeight: "600" }}>
-                Aditya Shrestha
-              </Typography>
-              <Typography sx={{ textAlign: "justify" }}>
-                Hello, its my first comment, how are you??? I am fine, i like
-                this blog, thankyou!!!!!!
-              </Typography>
-            </Box>
-            <Box sx={{ position: "absolute", top: 5, right: 5 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="body2" sx={{ color: "#1dd3b0" }}>
-                  2
-                </Typography>
-                <IconButton>
-                  <ThumbUpIcon sx={{ color: "#1dd3b0" }} />
-                </IconButton>
-                <Typography variant="body2" sx={{ color: "#ef233c" }}>
-                  2
-                </Typography>
-                <IconButton>
-                  <ThumbDownAltIcon sx={{ color: "#ef233c" }} />
-                </IconButton>
-              </Box>
-            </Box>
-          </Card>
-          <Card
-            elevation={0}
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              width: "80%",
-              margin: "auto",
-              marginTop: 2,
-              bgcolor: "white",
-              paddingX: "40px",
-              paddingY: "40px",
-              position: "relative",
-            }}
-          >
-            <Avatar></Avatar>
-            <Box sx={{ width: "85%", margin: "auto" }}>
-              <Typography variant="body1" sx={{ fontWeight: "600" }}>
-                Aditya Shrestha
-              </Typography>
-              <Typography sx={{ textAlign: "justify" }}>
-                Hello, its my first comment, how are you??? I am fine, i like
-                this blog, thankyou!!!!!!
-              </Typography>
-            </Box>
-            <Box sx={{ position: "absolute", top: 5, right: 5 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="body2" sx={{ color: "#1dd3b0" }}>
-                  2
-                </Typography>
-                <IconButton>
-                  <ThumbUpIcon sx={{ color: "#1dd3b0" }} />
-                </IconButton>
-                <Typography variant="body2" sx={{ color: "#ef233c" }}>
-                  2
-                </Typography>
-                <IconButton>
-                  <ThumbDownAltIcon sx={{ color: "#ef233c" }} />
-                </IconButton>
-              </Box>
-            </Box>
-          </Card>
+                <Avatar></Avatar>
+                <Box sx={{ width: "85%", margin: "auto" }}>
+                  <Typography variant="body1" sx={{ fontWeight: "600" }}>
+                    {comment.commentedUserName}
+                  </Typography>
+                  <Typography sx={{ textAlign: "justify" }}>
+                    {comment.message}
+                  </Typography>
+                </Box>
+                <Box sx={{ position: "absolute", top: 5, right: 5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: "#1dd3b0" }}>
+                      {comment.upVote}
+                    </Typography>
+                    <IconButton>
+                      <ThumbUpIcon sx={{ color: "#1dd3b0" }} />
+                    </IconButton>
+                    <Typography variant="body2" sx={{ color: "#ef233c" }}>
+                      {comment.downVote}
+                    </Typography>
+                    <IconButton>
+                      <ThumbDownAltIcon sx={{ color: "#ef233c" }} />
+                    </IconButton>
+                  </Box>
+                </Box>
+              </Card>
+            ))}
         </Box>
       </Box>
       <Box sx={{ width: "720px", marginLeft: "89px", marginTop: "20px" }}>

@@ -2,6 +2,7 @@ import { BASE_URL } from "../../constant/constant";
 import { CustomError } from "../../errors/custom.error";
 import Cookies from "js-cookie";
 
+
 export interface CommentBodyProps {
   message: string
 }
