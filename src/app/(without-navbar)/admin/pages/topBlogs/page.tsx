@@ -1,4 +1,6 @@
 "use client";
+import { CustomError } from "@/app/common/errors/custom.error";
+import { GetTopBlogs } from "@/app/common/helper/admin-helper/admin.top-blogs.request ";
 import {
   Box,
   Typography,
@@ -12,19 +14,49 @@ import {
   CardContent,
   CardMedia,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const topBlogsPage = () => {
-  const [Monthfilter, setMonthFilter] = React.useState("all");
-  const [Yearfilter, setYearFilter] = React.useState("2024");
+  const [monthfilter, setMonthFilter] = React.useState("");
+  const [yearfilter, setYearFilter] = React.useState("2024");
+
+  const [cardsData, setCardsData] = useState<any[]>([]);
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleMonthChange = (event: SelectChangeEvent) => {
+    if ((event.target.value as string) == "all") setMonthFilter("");
     setMonthFilter(event.target.value as string);
   };
 
   const handleYearChange = (event: SelectChangeEvent) => {
     setYearFilter(event.target.value as string);
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await GetTopBlogs({
+          year: yearfilter,
+          month: monthfilter,
+        });
+        console.log(response);
+
+        setCardsData(response.Data);
+      } catch (error) {
+        if (error instanceof CustomError) {
+          console.log("This is Error in fetch: ", error._error);
+          if (error._error.Message instanceof Array) {
+            //This is not required since every thing is handle by frontend
+          }
+          setErrorMessage(error._error.Message);
+          console.log("This is Error: ", error._error.Message);
+        }
+      }
+    }
+
+    fetchData();
+  }, [monthfilter, yearfilter]);
 
   return (
     <Box sx={{ display: "flex", marginLeft: "250px" }}>
@@ -49,7 +81,7 @@ const topBlogsPage = () => {
               <FormControl>
                 <InputLabel>Month Filter</InputLabel>
                 <Select
-                  value={Monthfilter}
+                  value={monthfilter}
                   label="Month Filter"
                   onChange={handleMonthChange}
                 >
@@ -71,7 +103,7 @@ const topBlogsPage = () => {
               <FormControl>
                 <InputLabel>Year Filter</InputLabel>
                 <Select
-                  value={Yearfilter}
+                  value={yearfilter}
                   label="YearFilter"
                   onChange={handleYearChange}
                 >
@@ -91,240 +123,52 @@ const topBlogsPage = () => {
             flexWrap: "wrap",
           }}
         >
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-          <Card
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "white",
-              maxHeight: 300,
-              maxWidth: 240,
-              borderRadius: 1,
-              "&:hover": {
-                transform: "scale(1.02)",
-                bgcolor: "#f2f2f2",
-                color: "black",
-              },
-              transition: "all 0.2s ease-in-out",
-            }}
-            elevation={0}
-          >
-            <CardActionArea disableRipple>
-              <CardMedia component="img" height="200" alt="green iguana" />
-              <CardContent>
-                <Typography gutterBottom variant="body1" component="div">
-                  This is a card title, hello world how are you?
-                </Typography>
-                <Typography fontSize={12}>I am Author</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
+          {cardsData !== null &&
+            cardsData.map((card, index) => (
+              <Card
+                sx={{
+                  bgcolor: "#1a1a1a",
+                  color: "white",
+                  maxHeight: 300,
+                  width: 240,
+                  maxWidth: "100%",
+                  borderRadius: 1,
+                  "&:hover": {
+                    transform: "scale(1.02)",
+                    bgcolor: "#f2f2f2",
+                    color: "black",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+                elevation={0}
+              >
+                <CardActionArea disableRipple>
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={"/" + card["imgUrl"]}
+                    alt="green iguana"
+                  />
+                  <CardContent>
+                    <Typography
+                      gutterBottom
+                      variant="body1"
+                      component="div"
+                      sx={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {card["title"]}
+                    </Typography>
+                    <Typography fontSize={12}>
+                      {card["postUser"]["name"]}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            ))}
         </Box>
       </Box>
     </Box>
