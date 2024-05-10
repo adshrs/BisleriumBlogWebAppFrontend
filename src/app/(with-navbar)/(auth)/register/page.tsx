@@ -167,9 +167,6 @@ const RegisterPage = () => {
               Sign up
             </Typography>
           </Box>
-          <Alert severity="success" sx={{ mt: 2 }}>
-            Please check your email for verification
-          </Alert>
           <TextField
             margin="normal"
             required

@@ -448,6 +448,23 @@ const AccountPage = () => {
             >
               Edit Profile
             </Button>
+            <Button
+              variant="outlined"
+              startIcon={<EditIcon />}
+              onClick={handleEditProfileDialogOpen}
+              sx={{
+                color: "red",
+                borderColor: "red",
+                width: "200px",
+                "&:hover": {
+                  color: "red",
+                  borderColor: "gray",
+                },
+                mt: 2,
+              }}
+            >
+              Delete Profile
+            </Button>
             <Dialog
               open={openEditProfileDialog}
               onClose={handleEditProfileDialogClose}

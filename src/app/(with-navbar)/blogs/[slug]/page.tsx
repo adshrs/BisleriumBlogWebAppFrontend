@@ -37,7 +37,8 @@ import {
   validateForm,
 } from "@/app/common/helper/comment-helper/comment.validation";
 import router from "next/router";
-
+import { BASE_URL } from "@/app/common/constant/constant";
+import Cookies from "js-cookie";
 interface Comment {
   id: number;
   commentedUserName: string;
@@ -45,7 +46,7 @@ interface Comment {
   upVote: number;
   downVote: number;
 }
-
+const token = Cookies.get("Token");
 const SingleBlogPage = () => {
   const currentPath = usePathname(); // getting the current path URL
   const parts = currentPath?.split("/"); // Split the path by slashes
@@ -71,6 +72,78 @@ const SingleBlogPage = () => {
   const [commentEmptyError, setCommentEmptyError] = useState("");
 
   const [isCommentEmpty, setIsCommentEmpty] = useState(false);
+
+  const handleUpvoteComment = async (id: string | number) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}api/user/vote/upvote-comment/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("This is Data upvote: ", data.Data);
+      setCommentList((previousData) =>
+        previousData.map((comment) =>
+          comment.id === id ? { ...comment, upVote: data.Data.upVote } : comment
+        )
+      );
+      setCommentList((previousData) =>
+        previousData.map((comment) =>
+          comment.id === id
+            ? { ...comment, downVote: data.Data.downVote }
+            : comment
+        )
+      );
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleDownvoteComment = async (id: string | number) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}api/user/vote/downvote-comment/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("This is Data upvote: ", data.Data);
+      setCommentList((previousData) =>
+        previousData.map((comment) =>
+          comment.id === id
+            ? { ...comment, downVote: data.Data.downVote }
+            : comment
+        )
+      );
+      setCommentList((previousData) =>
+        previousData.map((comment) =>
+          comment.id === id ? { ...comment, upVote: data.Data.upVote } : comment
+        )
+      );
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   useEffect(() => {
     async function fetchBlogInfo() {
@@ -369,6 +442,7 @@ const SingleBlogPage = () => {
         >
           {commentList !== null &&
             commentList.map((comment, index) => (
+              // eslint-disable-next-line react/jsx-key
               <Card
                 elevation={0}
                 sx={{
@@ -404,13 +478,15 @@ const SingleBlogPage = () => {
                     <Typography variant="body2" sx={{ color: "#1dd3b0" }}>
                       {comment.upVote}
                     </Typography>
-                    <IconButton>
+                    <IconButton onClick={() => handleUpvoteComment(comment.id)}>
                       <ThumbUpIcon sx={{ color: "#1dd3b0" }} />
                     </IconButton>
                     <Typography variant="body2" sx={{ color: "#ef233c" }}>
                       {comment.downVote}
                     </Typography>
-                    <IconButton>
+                    <IconButton
+                      onClick={() => handleDownvoteComment(comment.id)}
+                    >
                       <ThumbDownAltIcon sx={{ color: "#ef233c" }} />
                     </IconButton>
                   </Box>

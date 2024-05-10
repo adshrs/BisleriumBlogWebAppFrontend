@@ -82,18 +82,24 @@ const AdminDashboardPage = () => {
     console.log("This is total comments: ", TotalComments);
   }, [TotalBlogs, TotalVotes, TotalUpvotes, TotalDownvotes, TotalComments]);
   return (
-    <Box sx={{ display: "flex", marginLeft: "250px" }}>
-      <Box sx={{ p: 3 }}>
+    <Box
+      sx={{
+        display: "flex",
+        marginLeft: "250px",
+      }}
+    >
+      <Box sx={{ p: 3, width: "100%" }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "25px",
+            width: "100%",
           }}
         >
           <Box
-            width={"90%"}
+            width={"100%"}
             display={"flex"}
             flexDirection={"row"}
             alignItems={"center"}
@@ -142,7 +148,9 @@ const AdminDashboardPage = () => {
           sx={{
             display: "flex",
             flexDirection: "row",
-            gap: 2,
+            justifyContent: "center0",
+            alignItems: "center",
+            gap: 13,
             marginBottom: "25px",
           }}
         >
@@ -214,38 +222,6 @@ const AdminDashboardPage = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Box>
-        <Box>
-          <Typography variant="h5">Visualizations</Typography>
-        </Box>
-        <Box
-          sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
-        >
-          <LineChart
-            xAxis={[{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }]}
-            series={[
-              {
-                data: [2, 3, 5.5, 8.5, 1.5, 5, 1, 4, 3, 8],
-                showMark: ({ index }) => index % 2 === 0,
-              },
-            ]}
-            width={500}
-            height={300}
-          />
-
-          <PieChart
-            series={[
-              {
-                data: [
-                  { id: 0, value: 10, label: "series A" },
-                  { id: 1, value: 15, label: "series B" },
-                  { id: 2, value: 20, label: "series C" },
-                ],
-              },
-            ]}
-            width={400}
-            height={200}
-          />
         </Box>
       </Box>
     </Box>
