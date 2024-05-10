@@ -9,14 +9,29 @@ import {
   Select,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { use, useEffect } from "react";
 import { SelectChangeEvent } from "@mui/material/Select";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { PieChart } from "@mui/x-charts/PieChart";
-
+import { BASE_URL } from "@/app/common/constant/constant";
+import { CustomError } from "@/app/common/errors/custom.error";
+import {
+  GetBlogCount,
+  GetTotalComments,
+  GetTotalVotes,
+} from "@/app/common/helper/admin-helper/admin.fetch-blog.request";
 const AdminDashboardPage = () => {
   const [Monthfilter, setMonthFilter] = React.useState("all");
   const [Yearfilter, setYearFilter] = React.useState("2024");
+
+  //Total count of Blogs
+  const [TotalBlogs, setTotalBlogs] = React.useState<number>(0);
+
+  const [TotalVotes, setTotalVotes] = React.useState<number>(0);
+  const [TotalUpvotes, setTotalUpvotes] = React.useState<number>(0);
+  const [TotalDownvotes, setTotalDownvotes] = React.useState<number>(0);
+
+  const [TotalComments, setTotalComments] = React.useState<number>(0);
 
   const handleMonthChange = (event: SelectChangeEvent) => {
     setMonthFilter(event.target.value as string);
@@ -26,6 +41,46 @@ const AdminDashboardPage = () => {
     setYearFilter(event.target.value as string);
   };
 
+  useEffect(() => {
+    //fetch from 3 endpoints one from blog, one from upvotes, one from downvotes
+    //Fetch from Blogs to get total blogs
+    async function fetchBlogData() {
+      try {
+        const response = await GetBlogCount();
+        console.log("This is Response: ", response.Data);
+        setTotalBlogs(response.Data.totalCount);
+      } catch (error) {}
+    }
+
+    async function fetchUpvotesData() {
+      try {
+        const response = await GetTotalVotes();
+        console.log("This is Response: ", response.Data);
+        setTotalVotes(response.Data.totalVotes);
+        setTotalUpvotes(response.Data.totalUpVotes);
+        setTotalDownvotes(response.Data.totalDownVotes);
+      } catch (error) {}
+    }
+
+    async function fetchCommentsData() {
+      try {
+        const response = await GetTotalComments();
+        console.log("This is Response: ", response.Data);
+        setTotalComments(response.Data);
+      } catch (error) {}
+    }
+    fetchBlogData();
+    fetchUpvotesData();
+    fetchCommentsData();
+  }, []);
+
+  useEffect(() => {
+    console.log("This is total blog: ", TotalBlogs);
+    console.log("This is total votes: ", TotalVotes);
+    console.log("This is total upvotes: ", TotalUpvotes);
+    console.log("This is total downvotes: ", TotalDownvotes);
+    console.log("This is total comments: ", TotalComments);
+  }, [TotalBlogs, TotalVotes, TotalUpvotes, TotalDownvotes, TotalComments]);
   return (
     <Box sx={{ display: "flex", marginLeft: "250px" }}>
       <Box sx={{ p: 3 }}>
@@ -104,7 +159,7 @@ const AdminDashboardPage = () => {
           >
             <CardContent>
               <Typography sx={{ color: "white", fontSize: "18px" }}>
-                Total Blogs: 120
+                Total Blogs: {TotalBlogs}
               </Typography>
             </CardContent>
           </Card>
@@ -121,7 +176,7 @@ const AdminDashboardPage = () => {
           >
             <CardContent>
               <Typography sx={{ color: "white", fontSize: "18px" }}>
-                Total Upvotes: 120
+                Total Upvotes: {TotalUpvotes}
               </Typography>
             </CardContent>
           </Card>
@@ -138,7 +193,7 @@ const AdminDashboardPage = () => {
           >
             <CardContent>
               <Typography sx={{ color: "white", fontSize: "18px" }}>
-                Total Downvotes: 120
+                Total Downvotes: {TotalDownvotes}
               </Typography>
             </CardContent>
           </Card>
@@ -155,7 +210,7 @@ const AdminDashboardPage = () => {
           >
             <CardContent>
               <Typography sx={{ color: "white", fontSize: "18px" }}>
-                Total Comments: 120
+                Total Comments: {TotalComments}
               </Typography>
             </CardContent>
           </Card>

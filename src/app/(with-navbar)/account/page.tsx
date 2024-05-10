@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -43,6 +43,8 @@ import {
   ReturnProps,
   validateForm,
 } from "@/app/common/helper/register-helper/register.validation";
+import { BASE_URL } from "@/app/common/constant/constant";
+import Cookies from "js-cookie";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -55,55 +57,74 @@ const VisuallyHiddenInput = styled("input")({
   whiteSpace: "nowrap",
   width: 1,
 });
+const token = Cookies.get("Token");
+interface User {
+  userId: number;
+  name: string;
+}
 
+interface Blog {
+  title: string;
+  content: string;
+  postUser: User;
+  imgUrl: string;
+  upVote: number;
+  downVote: number;
+  votes: Array<any>; // Replace 'any' with the appropriate type if known
+  comments: Array<any>; // Replace 'any' with the appropriate type if known
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
 const AccountPage = () => {
-  const userBlogs = [
-    { id: 1, title: "Top world favorite travel destinations in 2024." },
-    {
-      id: 2,
-      title: "Explore the world of dailtdotdev for amazing daily tech news.",
-    },
-    {
-      id: 3,
-      title:
-        "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
-    },
-    {
-      id: 4,
-      title:
-        "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
-    },
-    {
-      id: 5,
-      title:
-        "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
-    },
-    {
-      id: 6,
-      title:
-        "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
-    },
-    {
-      id: 7,
-      title:
-        "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
-    },
-    {
-      id: 8,
-      title:
-        "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
-    },
-    {
-      id: 9,
-      title:
-        "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
-    },
-    {
-      id: 10,
-      title:
-        "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
-    },
-  ];
+  // const userBlogs = [
+  //   { id: 1, title: "Top world favorite travel destinations in 2024." },
+  //   {
+  //     id: 2,
+  //     title: "Explore the world of dailtdotdev for amazing daily tech news.",
+  //   },
+  //   {
+  //     id: 3,
+  //     title:
+  //       "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
+  //   },
+  //   {
+  //     id: 4,
+  //     title:
+  //       "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
+  //   },
+  //   {
+  //     id: 5,
+  //     title:
+  //       "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
+  //   },
+  //   {
+  //     id: 6,
+  //     title:
+  //       "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
+  //   },
+  //   {
+  //     id: 7,
+  //     title:
+  //       "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
+  //   },
+  //   {
+  //     id: 8,
+  //     title:
+  //       "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
+  //   },
+  //   {
+  //     id: 9,
+  //     title:
+  //       "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
+  //   },
+  //   {
+  //     id: 10,
+  //     title:
+  //       "Wonderful places around kathamdnu valley to hangout with your friends, discover more on my blog to see more.",
+  //   },
+  // ];
 
   const [openEditProfileDialog, setEditProfileDialogOpen] =
     React.useState(false);
@@ -113,6 +134,7 @@ const AccountPage = () => {
 
   const [name, setName] = useState("");
   const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
   const [nameEmptyError, setNameEmptyError] = useState("");
@@ -121,21 +143,151 @@ const AccountPage = () => {
   const [isNameEmpty, setIsNameEmpty] = useState(false);
   const [isUserNameEmpty, setIsUserNameEmpty] = useState(false);
 
+  const [userBlogs, setBlogData] = useState<Blog[]>([]);
+
+  const [editBlogName, setEditBlogName] = useState("");
+  const [editBlogContent, setEditBlogContent] = useState("");
+  const [selectedBlogId, setSelectedBlogId] = useState<string | number>("");
+  const [userId, setSelecteduserId] = useState<string | number>("");
+
+  const handleSave = async () => {
+    console.log("Save is Clicked");
+
+    const blogData = {
+      title: editBlogName,
+      content: editBlogContent,
+      imgUrl: image,
+    };
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}api/user/blogs/update/${selectedBlogId}
+      `,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(blogData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setBlogData((previousData) =>
+        previousData.map((blog) =>
+          blog.id === selectedBlogId ? data.Data : blog
+        )
+      );
+
+      // Update the state of your component here
+      // For example, you might want to close the dialog and refresh the list of blogs
+      handleEditDialogClose();
+      // refreshBlogs(); // This is just an example. Implement this function based on your needs
+    } catch (error) {
+      console.error("There was a problem with the fetch operation: ", error);
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}api/user/blogs/soft-delete/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("This is Data delete: ", data.Data);
+      setBlogData((previousData) =>
+        previousData.filter((blog) => blog.id !== id)
+      );
+      handleDeleteDialogClose();
+    } catch (error) {
+      console.error("Error:", error);
+      handleDeleteDialogClose();
+    }
+  };
+  useEffect(() => {
+    // Fetch user data
+    async function fetchUserData() {
+      // Handle API response
+      try {
+        const response = await fetch(
+          `${BASE_URL}api/user/user/authorized-info`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+
+        setSelecteduserId(data.Data.id);
+        setUserName(data.Data.userName);
+        setName(data.Data.name);
+        setEmail(data.Data.email);
+
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+      }
+      try {
+        const blogs = await fetch(`${BASE_URL}api/user/blogs/personal-blogs`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const blogData = await blogs.json();
+        console.log("These are Blogs", blogData.Data);
+        setBlogData(blogData.Data);
+      } catch (error) {}
+    }
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    console.log("Name: ", name);
+    console.log("Username: ", userName);
+    console.log("Email: ", email);
+    console.log("blogs: ", userBlogs);
+    console.log("userId: ", userId);
+  }, [name, userName, email, userBlogs, userId]);
+
   const handleEditProfileDialogOpen = () => {
     setEditProfileDialogOpen(true);
   };
 
   const handleEditProfileDialogClose = () => {
     setEditProfileDialogOpen(false);
-    setName("");
-    setUserName("");
-    setErrorMessage("");
-    setIsNameEmpty(false);
-    setIsUserNameEmpty(false);
+    // setName("");
+    // setUserName("");
+    // setErrorMessage("");
+    // setIsNameEmpty(false);
+    // setIsUserNameEmpty(false);
   };
 
-  const handleEditDialogOpen = () => {
+  const handleEditDialogOpen = (id: string | number) => {
     setEditDialogOpen(true);
+    setSelectedBlogId(id);
   };
 
   const handleEditDialogClose = () => {
@@ -164,30 +316,36 @@ const AccountPage = () => {
 
   async function HandleEditProfile() {
     // Resetting error states
-    setErrorMessage("");
-    setIsNameEmpty(false);
-    setIsUserNameEmpty(false);
+    console.log("Profile Edit");
+
+    const profileData = {
+      name: name,
+    };
+    // setErrorMessage("");
+    // setIsNameEmpty(false);
+    // setIsUserNameEmpty(false);
 
     try {
-      const validatedForm: ReturnProps = validateForm(
-        name,
-        userName,
-        null,
-        null
+      // Handle API response
+      console.log("Else");
+
+      const updateProfile = await fetch(
+        `${BASE_URL}api/user/user/update
+        `,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(profileData),
+        }
       );
-      if (validatedForm.isEmpty) {
-        if (validatedForm.forName) {
-          setIsNameEmpty(true);
-          setNameEmptyError(validatedForm.forName);
-        }
-        if (validatedForm.forUserName) {
-          setIsUserNameEmpty(true);
-          setUserNameEmptyError(validatedForm.forUserName);
-        }
-      } else {
-        // Handle API response
-        handleEditProfileDialogClose;
-      }
+
+      const updatedData = await updateProfile.json();
+      console.log("This is Updated Data: ", updatedData);
+
+      handleEditProfileDialogClose();
     } catch (error) {
       if (error instanceof CustomError) {
         console.log("This is Error in fetch: ", error._error);
@@ -237,19 +395,19 @@ const AccountPage = () => {
             sx={{ bgcolor: green[500], width: 100, height: 100, margin: 2 }}
             alt="Aditya Shrestha"
           ></Avatar>
-          <Chip icon={<Face6Icon />} label="Bislerium Member" color="info" />
+          <Chip icon={<Face6Icon />} label={name} color="info" />
           <Box sx={{ marginBottom: 2 }}>
             <Box
               sx={{ display: "flex", alignItems: "center", gap: 2, margin: 2 }}
             >
               <PersonIcon />
-              <Typography variant="body2">John Doe</Typography>
+              <Typography variant="body2">{name}</Typography>
             </Box>
             <Box
               sx={{ display: "flex", alignItems: "center", gap: 2, margin: 2 }}
             >
               <BadgeIcon />
-              <Typography variant="body2">JohnDoe619</Typography>
+              <Typography variant="body2">{userName}</Typography>
             </Box>
             <Box
               sx={{
@@ -269,7 +427,7 @@ const AccountPage = () => {
                   whiteSpace: "nowrap",
                 }}
               >
-                johndoe@example.com
+                {email}
               </Typography>
             </Box>
           </Box>
@@ -319,53 +477,13 @@ const AccountPage = () => {
                     required
                     fullWidth
                     variant="outlined"
-                    placeholder="Aditya Chandra Shrestha"
+                    defaultValue={name}
                     error={isNameEmpty}
                     helperText={isNameEmpty ? nameEmptyError : ""}
                     onChange={(e) => {
                       setName(e.target.value);
                       if (e.target.value.trim() !== "") {
                         setNameEmptyError("");
-                      }
-                    }}
-                    sx={{
-                      width: "100%",
-                      maxWidth: "100%",
-                      backgroundColor: "#fff",
-                      "& .MuiInputLabel-root": {
-                        color: "grey", // Change the label color
-                      },
-                      "& .MuiInputLabel-root.Mui-focused": {
-                        fontSize: "20px", // Change the font size when focused
-                        color: "black",
-                      },
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": {
-                          borderColor: "black", // Change the border color
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#black", // Change the border color on hover
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "Black", // Change the border color when focused
-                          fontSize: "20px",
-                        },
-                      },
-                    }}
-                  />
-                  <Typography pt={3}>Username:</Typography>
-                  <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    variant="outlined"
-                    placeholder="aditya"
-                    error={isUserNameEmpty}
-                    helperText={isUserNameEmpty ? userNameEmptyError : ""}
-                    onChange={(e) => {
-                      setUserName(e.target.value);
-                      if (e.target.value.trim() !== "") {
-                        setUserNameEmptyError("");
                       }
                     }}
                     sx={{
@@ -470,11 +588,11 @@ const AccountPage = () => {
                       {blog.title}
                     </Typography>
                     <Box>
-                      <IconButton aria-label="edit">
-                        <EditIcon
-                          sx={{ color: "black" }}
-                          onClick={handleEditDialogOpen}
-                        />
+                      <IconButton
+                        aria-label="edit"
+                        onClick={() => handleEditDialogOpen(blog.id)}
+                      >
+                        <EditIcon sx={{ color: "black" }} />
                       </IconButton>
                       <Dialog
                         fullScreen
@@ -501,7 +619,7 @@ const AccountPage = () => {
                             <Button
                               autoFocus
                               color="inherit"
-                              onClick={handleEditDialogClose}
+                              onClick={handleSave}
                             >
                               save
                             </Button>
@@ -617,7 +735,11 @@ const AccountPage = () => {
                                 required
                                 id="outlined-required"
                                 label="Title"
-                                value={"This is a Blog Title"}
+                                placeholder={blog.title}
+                                defaultValue={blog.title}
+                                onChange={(e) => {
+                                  setEditBlogName(e.target.value);
+                                }}
                                 sx={{
                                   width: "100%",
                                   maxWidth: "100%",
@@ -649,7 +771,11 @@ const AccountPage = () => {
                                 label="Content"
                                 multiline
                                 rows={10}
-                                value={"This is a Blog Content"}
+                                placeholder={blog.content}
+                                defaultValue={blog.content}
+                                onChange={(e) => {
+                                  setEditBlogContent(e.target.value);
+                                }}
                                 variant="outlined"
                                 sx={{
                                   width: "100%",
@@ -711,7 +837,7 @@ const AccountPage = () => {
                             No
                           </Button>
                           <Button
-                            onClick={handleDeleteDialogClose}
+                            onClick={() => handleDelete(blog.id)}
                             sx={{ color: "#d90429" }}
                             autoFocus
                           >

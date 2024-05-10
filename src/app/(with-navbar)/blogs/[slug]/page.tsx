@@ -357,11 +357,11 @@ const SingleBlogPage = () => {
           variant="h5"
           sx={{ width: "80%", margin: "auto", marginBottom: "15px" }}
         >
-          Comments <span style={{ fontWeight: "bold" }}>(2)</span>
+          Comments
         </Typography>
         <Box
           sx={{
-            height: "400px",
+            height: "280px",
             overflowY: "auto",
             marginX: "auto",
             padding: 0,
@@ -398,6 +398,7 @@ const SingleBlogPage = () => {
                       display: "flex",
                       flexDirection: "row",
                       alignItems: "center",
+                      justifyContent: "end",
                     }}
                   >
                     <Typography variant="body2" sx={{ color: "#1dd3b0" }}>
@@ -412,6 +413,15 @@ const SingleBlogPage = () => {
                     <IconButton>
                       <ThumbDownAltIcon sx={{ color: "#ef233c" }} />
                     </IconButton>
+                  </Box>
+                  <Box
+                    mt={6}
+                    display={"flex"}
+                    flexDirection={"row"}
+                    alignItems={"center"}
+                  >
+                    <Button>edit</Button>
+                    <Button>delete</Button>
                   </Box>
                 </Box>
               </Card>

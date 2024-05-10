@@ -7,6 +7,7 @@ import {
 } from "@/app/common/helper/register-helper/register.validation";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
 import {
+  Alert,
   Box,
   Button,
   Container,
@@ -166,7 +167,9 @@ const RegisterPage = () => {
               Sign up
             </Typography>
           </Box>
-          {errorMessage}
+          <Alert severity="success" sx={{ mt: 2 }}>
+            Please check your email for verification
+          </Alert>
           <TextField
             margin="normal"
             required
